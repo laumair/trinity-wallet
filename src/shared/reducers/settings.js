@@ -1,3 +1,4 @@
+import find from 'lodash/find';
 import merge from 'lodash/merge';
 import unionBy from 'lodash/unionBy';
 import sortBy from 'lodash/sortBy';
@@ -186,7 +187,7 @@ const settingsReducer = (state = initialState, action) => {
         case ActionTypes.SET_NODELIST:
             return {
                 ...state,
-                nodes: unionBy(action.payload, state.customNodes, [state.node], 'url'),
+                nodes: unionBy(action.payload, state.customNodes, [find(state.nodes, { url: state.node })], 'url'),
             };
         case ActionTypes.SET_MODE:
             return {

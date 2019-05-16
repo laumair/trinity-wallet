@@ -1,18 +1,23 @@
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
+import map from 'lodash/map';
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { withNamespaces } from 'react-i18next';
 import { connect } from 'react-redux';
 import { StyleSheet, View } from 'react-native';
 import { setSetting } from 'shared-modules/actions/wallet';
-import { setFullNode, updateQuorumConfig, updateNodeAutoSwitchSetting, updateAutoNodeListSetting } from 'shared-modules/actions/settings';
+import {
+    setFullNode,
+    updateQuorumConfig,
+    updateNodeAutoSwitchSetting,
+    updateAutoNodeListSetting,
+} from 'shared-modules/actions/settings';
 import { getThemeFromState } from 'shared-modules/selectors/global';
 import { generateAlert } from 'shared-modules/actions/alerts';
 import MINIMUM_QUORUM_SIZE from 'shared-modules/config';
 import { leaveNavigationBreadcrumb } from 'libs/bugsnag';
 import { renderSettingsRows } from 'ui/components/SettingsContent';
-
 
 const styles = StyleSheet.create({
     container: {
@@ -25,7 +30,7 @@ const defaultState = {
     autoNodeList: true,
     nodeAutoSwitch: true,
     quorum: true,
-    quorumSize: '4'
+    quorumSize: '4',
 };
 
 /**
@@ -42,9 +47,21 @@ export class NodeSettings extends PureComponent {
         /** @ignore */
         theme: PropTypes.object.isRequired,
         /** @ignore */
-        nodes: PropTypes.array.isRequired,
+        nodes: PropTypes.arrayOf(
+            PropTypes.shape({
+                url: PropTypes.string.isRequired,
+                authKey: PropTypes.string.isRequired,
+                pow: PropTypes.bool.isRequired,
+            }),
+        ).isRequired,
         /** @ignore */
-        customNodes: PropTypes.array.isRequired,
+        customNodes: PropTypes.arrayOf(
+            PropTypes.shape({
+                url: PropTypes.string.isRequired,
+                authKey: PropTypes.string.isRequired,
+                pow: PropTypes.bool.isRequired,
+            }),
+        ).isRequired,
         /** @ignore */
         generateAlert: PropTypes.func.isRequired,
         /** @ignore */
@@ -75,7 +92,7 @@ export class NodeSettings extends PureComponent {
             nodeAutoSwitch: props.nodeAutoSwitch,
             quorumEnabled: props.quorumEnabled,
             quorumSize: props.quorumSize.toString(),
-            node: props.node
+            node: props.node,
         };
     }
 
@@ -83,20 +100,19 @@ export class NodeSettings extends PureComponent {
         leaveNavigationBreadcrumb('NodeSettings');
     }
 
-
     onApplyPress() {
         const { autoNodeList, nodeAutoSwitch, quorumEnabled, node } = this.state;
         const quorumSize = parseInt(this.state.quorumSize);
-        if (autoNodeList !== this.props.autoNodeList){
+        if (autoNodeList !== this.props.autoNodeList) {
             this.props.updateAutoNodeListSetting(autoNodeList);
         }
-        if (nodeAutoSwitch !== this.props.nodeAutoSwitch){
+        if (nodeAutoSwitch !== this.props.nodeAutoSwitch) {
             this.props.updateNodeAutoSwitchSetting(nodeAutoSwitch);
         }
-        if (quorumEnabled !== this.props.quorumEnabled || quorumSize !== this.props.quorumSize){
+        if (quorumEnabled !== this.props.quorumEnabled || quorumSize !== this.props.quorumSize) {
             this.props.updateQuorumConfig({ enabled: quorumEnabled, size: quorumSize });
         }
-        if (node !== this.props.node){
+        if (node !== this.props.node) {
             this.props.setFullNode(node);
         }
     }
@@ -105,14 +121,28 @@ export class NodeSettings extends PureComponent {
         const { autoNodeList } = this.state;
         const { nodes, customNodes } = this.props;
         const nodeList = autoNodeList ? nodes : customNodes;
-        return Array(nodeList.length - 1).fill().map((_, idx) => (MINIMUM_QUORUM_SIZE + idx).toString());
+        return Array(nodeList.length - 1)
+            .fill()
+            .map((_, idx) => (MINIMUM_QUORUM_SIZE + idx).toString());
     }
 
     toggleQuorumEnabled() {
         const { t, customNodes, nodes } = this.props;
         const { quorumEnabled, autoNodeList } = this.state;
-        if (!quorumEnabled && ((autoNodeList && nodes.length < MINIMUM_QUORUM_SIZE) || (!autoNodeList && customNodes.length < MINIMUM_QUORUM_SIZE))) {
-            return this.props.generateAlert('error', t('nodeSettings:nodeEnoughNodesTitle'), autoNodeList ? t('nodeSettings:nodeEnoughNodesExplanation') : `${t('nodeSettings:nodeEnoughNodesExplanation')} ${t('nodeSettings:nodeEnoughNodesExplanationCustomNodes')}`);
+        if (
+            !quorumEnabled &&
+            ((autoNodeList && nodes.length < MINIMUM_QUORUM_SIZE) ||
+                (!autoNodeList && customNodes.length < MINIMUM_QUORUM_SIZE))
+        ) {
+            return this.props.generateAlert(
+                'error',
+                t('nodeSettings:nodeEnoughNodesTitle'),
+                autoNodeList
+                    ? t('nodeSettings:nodeEnoughNodesExplanation')
+                    : `${t('nodeSettings:nodeEnoughNodesExplanation')} ${t(
+                          'nodeSettings:nodeEnoughNodesExplanationCustomNodes',
+                      )}`,
+            );
         }
         this.setState({ quorumEnabled: !quorumEnabled });
     }
@@ -121,7 +151,11 @@ export class NodeSettings extends PureComponent {
         const { autoNodeList } = this.state;
         const { t, customNodes } = this.props;
         if (autoNodeList && isEmpty(customNodes)) {
-            return this.props.generateAlert('error', t('nodeSettings:noCustomNodes'), t('nodeSettings:mustAddCustomNodes'));
+            return this.props.generateAlert(
+                'error',
+                t('nodeSettings:noCustomNodes'),
+                t('nodeSettings:mustAddCustomNodes'),
+            );
         }
         if (autoNodeList && customNodes.length < MINIMUM_QUORUM_SIZE) {
             this.setState({ quorumEnabled: false });
@@ -149,7 +183,7 @@ export class NodeSettings extends PureComponent {
             {
                 name: t('nodeSettings:automaticNodeSelection'),
                 function: () => this.toggleAutomaticNodeSelection(),
-                toggle: autoNodeSelection
+                toggle: autoNodeSelection,
             },
             {
                 name: t('nodeSettings:addCustomNodes'),
@@ -158,37 +192,43 @@ export class NodeSettings extends PureComponent {
             { name: 'separator' },
             {
                 name: t('nodeSettings:autoNodeList'),
-                function: () => { !autoNodeSelection && this.toggleAutoNodeList(); },
+                function: () => {
+                    !autoNodeSelection && this.toggleAutoNodeList();
+                },
                 toggle: autoNodeList,
-                inactive: autoNodeSelection
+                inactive: autoNodeSelection,
             },
             { name: 'separator', inactive: autoNodeSelection },
             {
                 name: t('nodeSettings:nodeAutoswitching'),
-                function: () => { !autoNodeSelection && this.setState({ nodeAutoSwitch: !nodeAutoSwitch }); },
+                function: () => {
+                    !autoNodeSelection && this.setState({ nodeAutoSwitch: !nodeAutoSwitch });
+                },
                 toggle: nodeAutoSwitch,
-                inactive: autoNodeSelection
+                inactive: autoNodeSelection,
             },
             {
                 name: t('nodeSettings:primaryNode'),
                 function: (node) => this.setState({ node }),
                 inactive: autoNodeSelection || nodeAutoSwitch,
                 currentSetting: node,
-                dropdownOptions: nodes
+                dropdownOptions: map(nodes, (node) => node.url),
             },
             { name: 'separator', inactive: autoNodeSelection },
             {
                 name: t('nodeSettings:enableQuorum'),
-                function: () => { !autoNodeSelection && this.toggleQuorumEnabled(); },
+                function: () => {
+                    !autoNodeSelection && this.toggleQuorumEnabled();
+                },
                 toggle: quorumEnabled,
-                inactive: autoNodeSelection
+                inactive: autoNodeSelection,
             },
             {
                 name: t('nodeSettings:quorumSize'),
                 function: (quorumSize) => quorumSize && this.setState({ quorumSize: quorumSize.toString() }),
                 inactive: autoNodeSelection || !quorumEnabled,
                 dropdownOptions: this.getQuorumOptions(),
-                currentSetting: !quorumEnabled && '0' || quorumSize
+                currentSetting: (!quorumEnabled && '0') || quorumSize,
             },
             {
                 name: 'dualFooter',
@@ -196,7 +236,7 @@ export class NodeSettings extends PureComponent {
                 hideActionButton: isEqual(defaultState, this.state),
                 actionName: 'Apply',
                 actionFunction: () => this.onApplyPress(),
-                actionButtonLoading: isChangingNode
+                actionButtonLoading: isChangingNode,
             },
         ];
         return renderSettingsRows(rows, theme);
@@ -225,9 +265,12 @@ const mapDispatchToProps = {
     updateQuorumConfig,
     updateNodeAutoSwitchSetting,
     updateAutoNodeListSetting,
-    setFullNode
+    setFullNode,
 };
 
 export default withNamespaces(['advancedSettings', 'nodeSettings', 'settings', 'global'])(
-    connect(mapStateToProps, mapDispatchToProps)(NodeSettings),
+    connect(
+        mapStateToProps,
+        mapDispatchToProps,
+    )(NodeSettings),
 );

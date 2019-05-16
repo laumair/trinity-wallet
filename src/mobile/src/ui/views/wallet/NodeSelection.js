@@ -1,3 +1,4 @@
+import map from 'lodash/map';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -73,7 +74,13 @@ class NodeSelection extends Component {
         /** @ignore */
         node: PropTypes.string.isRequired,
         /** @ignore */
-        nodes: PropTypes.array.isRequired,
+        nodes: PropTypes.arrayOf(
+            PropTypes.shape({
+                url: PropTypes.string.isRequired,
+                authKey: PropTypes.string.isRequired,
+                pow: PropTypes.bool.isRequired,
+            }),
+        ).isRequired,
         /** Navigate to previous screen */
         backPress: PropTypes.func,
         /** @ignore */
@@ -125,7 +132,13 @@ class NodeSelection extends Component {
     }
 
     render() {
-        const { isChangingNode, node, nodes, t, theme: { body, primary } } = this.props;
+        const {
+            isChangingNode,
+            node,
+            nodes,
+            t,
+            theme: { body, primary },
+        } = this.props;
         const textColor = { color: body.color };
         const hasChangedNode = this.hasChangedNode();
 
@@ -148,7 +161,7 @@ class NodeSelection extends Component {
                             dropdownWidth={{ width: width / 1.5 }}
                             value={node}
                             saveSelection={(node) => this.setState({ node })}
-                            options={nodes}
+                            options={map(nodes, (node) => node.url)}
                         />
                     </View>
                     {isChangingNode ? (
@@ -203,4 +216,9 @@ const mapDispatchToProps = {
     setLoginRoute,
 };
 
-export default withNamespaces('global')(connect(mapStateToProps, mapDispatchToProps)(NodeSelection));
+export default withNamespaces('global')(
+    connect(
+        mapStateToProps,
+        mapDispatchToProps,
+    )(NodeSelection),
+);

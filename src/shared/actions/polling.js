@@ -355,7 +355,11 @@ export const fetchNodeList = () => {
 
                     const unionNodes = unionBy(
                         nodes,
-                        map(remoteNodes, (node) => ({ url: node.node, pow: node.pow })),
+                        map(remoteNodes, (node) => ({
+                            url: node.node,
+                            pow: node.pow,
+                            authKey: '',
+                        })),
                         'url',
                     );
 
@@ -363,7 +367,7 @@ export const fetchNodeList = () => {
                     quorum.setNodes(
                         union(
                             map(unionNodes, (node) => node.url),
-                            map(getCustomNodesFromState(getState(), (node) => node.url)),
+                            map(getCustomNodesFromState(getState()), (node) => node.url),
                         ),
                     );
 

@@ -38,7 +38,13 @@ class Settings extends Component {
         /** @ignore */
         navStack: PropTypes.array.isRequired,
         /** @ignore */
-        customNodes: PropTypes.array.isRequired
+        customNodes: PropTypes.arrayOf(
+            PropTypes.shape({
+                url: PropTypes.string.isRequired,
+                authKey: PropTypes.string.isRequired,
+                pow: PropTypes.bool.isRequired,
+            }),
+        ).isRequired,
     };
 
     constructor(props) {
@@ -96,7 +102,7 @@ class Settings extends Component {
             },
             addCustomNode: {
                 backPress: () => this.props.setSetting('nodeSettings'),
-                customNodes: this.props.customNodes
+                customNodes: this.props.customNodes,
             },
         };
 
@@ -188,11 +194,14 @@ const mapStateToProps = (state) => ({
     currentSetting: state.wallet.currentSetting,
     isSyncing: state.ui.isSyncing,
     navStack: state.wallet.navStack,
-    customNodes: state.settings.customNodes
+    customNodes: state.settings.customNodes,
 });
 
 const mapDispatchToProps = {
     setSetting,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Settings);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(Settings);
