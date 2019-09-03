@@ -7,6 +7,8 @@ import map from 'lodash/map';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import nock from 'nock';
+import { isBundle as isValidBundle } from '@iota/bundle-validator';
+import { asTransactionObject } from '@iota/transaction-converter';
 import {
     prepareTransferArray,
     getTransactionsDiff,
@@ -766,7 +768,7 @@ describe('libs: iota/transfers', () => {
                 };
             };
 
-            digestFn = (trytes) => Promise.resolve(iota.utils.transactionObject(trytes).hash);
+            digestFn = (trytes) => Promise.resolve(asTransactionObject(trytes).hash);
 
             trunkTransaction = 'LLJWVVZFXF9ZGFSBSHPCD9HOIFBCLXGRV9XWSQDTGOMSRGQQIVFVZKHLKTJJVFMXQTZVPNRNAQEPA9999';
             branchTransaction = 'GSHUHUWAUUGQHHNAPRDPDJRKZFJNIAPFNTVAHZPUNDJWRHZSZASOERZURXZVEHN9OJVS9QNRGSJE99999';
@@ -840,7 +842,7 @@ describe('libs: iota/transfers', () => {
 
             expect(bundles.length > 0).to.equal(true);
 
-            bundles.forEach((bundle) => expect(iota.utils.isBundle(bundle)).to.equal(true));
+            bundles.forEach((bundle) => expect(isValidBundle(bundle)).to.equal(true));
         });
     });
 
@@ -852,9 +854,9 @@ describe('libs: iota/transfers', () => {
                 performPow: (trytes) =>
                     Promise.resolve({
                         trytes,
-                        transactionObjects: map(trytes, iota.utils.transactionObject),
+                        transactionObjects: map(trytes, asTransactionObject),
                     }),
-                getDigest: (trytes) => Promise.resolve(iota.utils.transactionObject(trytes).hash),
+                getDigest: (trytes) => Promise.resolve(asTransactionObject(trytes).hash),
             };
         });
 
@@ -937,7 +939,7 @@ describe('libs: iota/transfers', () => {
             const result = sortTransactionTrytesArray(trytes, 'currentIndex', 'asc');
 
             expect(result).to.eql(failedTrytesWithCorrectTransactionHashes);
-            expect(iota.utils.transactionObject(result[0], EMPTY_TRANSACTION_TRYTES).currentIndex).to.equal(0);
+            expect(asTransactionObject(result[0], EMPTY_TRANSACTION_TRYTES).currentIndex).to.equal(0);
         });
 
         it('should sort transaction trytes in descending order', () => {
@@ -946,7 +948,7 @@ describe('libs: iota/transfers', () => {
 
             // failedTrytesWithCorrectTransactionHashes is in ascending order by default to assert with a reversed list
             expect(result).to.eql(failedTrytesWithCorrectTransactionHashes.slice().reverse());
-            expect(iota.utils.transactionObject(result[0], EMPTY_TRANSACTION_TRYTES).currentIndex).to.equal(2);
+            expect(asTransactionObject(result[0], EMPTY_TRANSACTION_TRYTES).currentIndex).to.equal(2);
         });
     });
 

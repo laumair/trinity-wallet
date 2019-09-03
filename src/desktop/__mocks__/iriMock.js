@@ -1,6 +1,4 @@
-import IOTA from 'iota.lib.js';
-
-const iota = new IOTA({ provider: 'foo://bar' });
+import { asTransactionObject, asTransactionTrytes } from '@iota/transaction-converter';
 
 export default (request) => {
     if (request.method() === 'OPTIONS') {
@@ -49,10 +47,8 @@ export default (request) => {
             break;
 
         case 'getTrytes': {
-            const transactionObject = iota.utils.transactionObject('9'.repeat(2673));
-            const trytes = iota.utils.transactionTrytes(
-                Object.assign({}, transactionObject, { timestamp: Date.now() }),
-            );
+            const transactionObject = asTransactionObject('9'.repeat(2673));
+            const trytes = asTransactionTrytes(Object.assign({}, transactionObject, { timestamp: Date.now() }));
             body = { trytes: Array(postData.hashes.length).fill(trytes) };
             break;
         }

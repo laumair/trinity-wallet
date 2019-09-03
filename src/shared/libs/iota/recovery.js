@@ -8,6 +8,8 @@ import map from 'lodash/map';
 import reduce from 'lodash/reduce';
 import some from 'lodash/some';
 import uniqBy from 'lodash/uniqBy';
+import { removeChecksum } from '@iota/checksum';
+import { asTransactionObject } from '@iota/transaction-converter';
 import {
     attachToTangleAsync,
     getTransactionsToApproveAsync,
@@ -18,7 +20,6 @@ import {
     getLatestInclusionAsync,
     wereAddressesSpentFromAsync,
 } from './extendedApi';
-import { iota } from './index';
 import Errors from '../errors';
 import { isValidInput } from './inputs';
 import {
@@ -50,8 +51,8 @@ const sweep = (settings, withQuorum) => (seedStore, seed, input, transfer) => {
         return Promise.reject(new Error(Errors.INVALID_TRANSFER));
     }
 
-    const validInput = assign({}, input, { address: iota.utils.noChecksum(input.address) });
-    const validTransfer = assign({}, transfer, { address: iota.utils.noChecksum(transfer.address) });
+    const validInput = assign({}, input, { address: removeChecksum(input.address) });
+    const validTransfer = assign({}, transfer, { address: removeChecksum(transfer.address) });
 
     if (validInput.address === validTransfer.address) {
         return Promise.reject(new Error(Errors.CANNOT_SWEEP_TO_SAME_ADDRESS));
@@ -187,7 +188,7 @@ const sweep = (settings, withQuorum) => (seedStore, seed, input, transfer) => {
         .then((trytes) => {
             cached.trytes = trytes;
 
-            const convertToTransactionObjects = (tryteString) => iota.utils.transactionObject(tryteString);
+            const convertToTransactionObjects = (tryteString) => asTransactionObject(tryteString);
             cached.transactionObjects = map(cached.trytes, convertToTransactionObjects);
 
             // Check if prepared bundle is valid, especially if its signed correctly.

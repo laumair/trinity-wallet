@@ -10,6 +10,7 @@ import size from 'lodash/size';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import nock from 'nock';
+import { isValidChecksum } from '@iota/checksum';
 import * as addressesUtils from '../../../libs/iota/addresses';
 import {
     addressData as mockAddressData,
@@ -36,7 +37,7 @@ import {
     newZeroValueAttachedTransactionTrytes,
 } from '../../__samples__/trytes';
 import mockAccounts from '../../__samples__/accounts';
-import { iota, quorum } from '../../../libs/iota/index';
+import { quorum } from '../../../libs/iota/index';
 import { IRI_API_VERSION } from '../../../config';
 import { EMPTY_TRANSACTION_TRYTES, EMPTY_HASH_TRYTES } from '../../../libs/iota/utils';
 
@@ -1929,7 +1930,7 @@ describe('libs: iota/addresses', () => {
 
                     // Test valid checksum
                     expectedAddressData.forEach(({ address, checksum }) => {
-                        expect(iota.utils.isValidChecksum(`${address}${checksum}`)).to.equal(true);
+                        expect(isValidChecksum(`${address}${checksum}`)).to.equal(true);
                     });
                 });
             });
@@ -1979,7 +1980,7 @@ describe('libs: iota/addresses', () => {
 
                     // Test valid checksum
                     expectedAddressData.forEach(({ address, checksum }) => {
-                        expect(iota.utils.isValidChecksum(`${address}${checksum}`)).to.equal(true);
+                        expect(isValidChecksum(`${address}${checksum}`)).to.equal(true);
                     });
                 });
             });

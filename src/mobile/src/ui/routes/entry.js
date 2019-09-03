@@ -12,7 +12,7 @@ import { withNamespaces } from 'react-i18next';
 import Realm from 'realm';
 import { Text, TextInput, NetInfo, YellowBox } from 'react-native';
 import { Provider } from 'react-redux';
-import { changeIotaNode, quorum } from 'shared-modules/libs/iota';
+import { iota, quorum } from 'shared-modules/libs/iota';
 import reduxStore from 'shared-modules/store';
 import { assignAccountIndexIfNecessary } from 'shared-modules/actions/accounts';
 import { fetchNodeList as fetchNodes } from 'shared-modules/actions/polling';
@@ -152,7 +152,7 @@ const fetchNodeList = (store) => {
     const node = get(settings, 'node');
 
     // Update provider
-    changeIotaNode(
+    iota.setSettings(
         assign({}, node, {
             provider: node.url,
         }),

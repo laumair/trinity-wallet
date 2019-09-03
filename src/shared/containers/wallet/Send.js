@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { isValidChecksum } from '@iota/checksum';
 import { generateAlert } from '../../actions/alerts';
 import { completeDeepLinkRequest } from '../../actions/wallet';
 import { makeTransaction } from '../../actions/transfers';
@@ -14,7 +15,6 @@ import {
     getAvailableBalanceForSelectedAccount,
 } from '../../selectors/accounts';
 import { VALID_SEED_REGEX, ADDRESS_LENGTH, isValidMessage } from '../../libs/iota/utils';
-import { iota } from '../../libs/iota';
 
 import { getThemeFromState } from '../../selectors/global';
 
@@ -125,7 +125,7 @@ export default function withSendData(SendComponent) {
             }
 
             // Validate address checksum
-            if (!iota.utils.isValidChecksum(address)) {
+            if (!isValidChecksum(address)) {
                 generateAlert('error', t('send:invalidAddress'), t('send:invalidAddressExplanation3'));
                 return false;
             }

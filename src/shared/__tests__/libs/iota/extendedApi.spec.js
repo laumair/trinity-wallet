@@ -3,6 +3,7 @@ import isEqual from 'lodash/isEqual';
 import map from 'lodash/map';
 import { expect } from 'chai';
 import nock from 'nock';
+import { asTransactionObject, asTransactionTrytes } from '@iota/transaction-converter';
 import { getIotaInstance, isNodeHealthy, allowsRemotePow } from '../../../libs/iota/extendedApi';
 import { iota } from '../../../libs/iota/index';
 import { newZeroValueTransactionTrytes } from '../../__samples__/trytes';
@@ -60,7 +61,9 @@ describe('libs: iota/extendedApi', () => {
                     .then(() => {
                         throw new Error();
                     })
-                    .catch((error) => expect(error.message).to.equal('The currently selected node uses an unsupported IRI version.'));
+                    .catch((error) =>
+                        expect(error.message).to.equal('The currently selected node uses an unsupported IRI version.'),
+                    );
             });
         });
 
@@ -99,7 +102,11 @@ describe('libs: iota/extendedApi', () => {
                     .then(() => {
                         throw new Error();
                     })
-                    .catch((error) => expect(error.message).to.equal('The selected node is out of sync. Its view of the Tangle may be innacurate.'));
+                    .catch((error) =>
+                        expect(error.message).to.equal(
+                            'The selected node is out of sync. Its view of the Tangle may be innacurate.',
+                        ),
+                    );
             });
         });
 
@@ -138,7 +145,11 @@ describe('libs: iota/extendedApi', () => {
                     .then(() => {
                         throw new Error();
                     })
-                    .catch((error) => expect(error.message).to.equal('The selected node is out of sync. Its view of the Tangle may be innacurate.'));
+                    .catch((error) =>
+                        expect(error.message).to.equal(
+                            'The selected node is out of sync. Its view of the Tangle may be innacurate.',
+                        ),
+                    );
             });
         });
 
@@ -207,10 +218,10 @@ describe('libs: iota/extendedApi', () => {
                                     trytes: [
                                         head(
                                             map(newZeroValueTransactionTrytes, (tryteString) => {
-                                                const transactionObject = iota.utils.transactionObject(tryteString);
+                                                const transactionObject = asTransactionObject(tryteString);
                                                 const timestampLessThanAMinuteAgo = Date.now() - 60000;
 
-                                                return iota.utils.transactionTrytes({
+                                                return asTransactionTrytes({
                                                     ...transactionObject,
                                                     timestamp: Math.round(timestampLessThanAMinuteAgo / 1000),
                                                 });
@@ -300,10 +311,10 @@ describe('libs: iota/extendedApi', () => {
                                     trytes: [
                                         head(
                                             map(newZeroValueTransactionTrytes, (tryteString) => {
-                                                const transactionObject = iota.utils.transactionObject(tryteString);
+                                                const transactionObject = asTransactionObject(tryteString);
                                                 const timestampLessThanAMinuteAgo = Date.now() - 60000;
 
-                                                return iota.utils.transactionTrytes({
+                                                return asTransactionTrytes({
                                                     ...transactionObject,
                                                     timestamp: Math.round(timestampLessThanAMinuteAgo / 1000),
                                                 });
@@ -388,10 +399,10 @@ describe('libs: iota/extendedApi', () => {
                                     trytes: [
                                         head(
                                             map(newZeroValueTransactionTrytes, (tryteString) => {
-                                                const transactionObject = iota.utils.transactionObject(tryteString);
+                                                const transactionObject = asTransactionObject(tryteString);
                                                 const timestampLessThanAMinuteAgo = Date.now() - 60000;
 
-                                                return iota.utils.transactionTrytes({
+                                                return asTransactionTrytes({
                                                     ...transactionObject,
                                                     timestamp: Math.round(timestampLessThanAMinuteAgo / 1000),
                                                 });

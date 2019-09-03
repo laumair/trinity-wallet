@@ -1,4 +1,4 @@
-import IOTA from 'iota.lib.js';
+import { asTransactionTrytes } from '@iota/transaction-converter';
 import { EMPTY_TRANSACTION_TRYTES } from '../../libs/iota/utils';
 import { latestMilestoneTransactionObject } from './transactions';
 
@@ -80,7 +80,7 @@ const newValueAttachedTransactionTrytes = [
 /**
  * Sample milestone trytes
  */
-const milestoneTrytes = [new IOTA().utils.transactionTrytes(latestMilestoneTransactionObject)];
+const milestoneTrytes = [asTransactionTrytes(latestMilestoneTransactionObject)];
 
 export default [
     ...confirmedZeroValueTrytes,

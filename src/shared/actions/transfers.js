@@ -14,7 +14,8 @@ import size from 'lodash/size';
 import every from 'lodash/every';
 import includes from 'lodash/includes';
 import uniq from 'lodash/uniq';
-import { iota } from '../libs/iota';
+import { addChecksum, removeChecksum } from '@iota/checksum';
+import { asTransactionObject } from '@iota/transaction-converter';
 import {
     replayBundleAsync,
     promoteTransactionAsync,
@@ -468,7 +469,7 @@ export const makeTransaction = (seedStore, receiveAddress, value, message, accou
 ) => {
     dispatch(sendTransferRequest());
 
-    const address = size(receiveAddress) === 90 ? receiveAddress : iota.utils.addChecksum(receiveAddress);
+    const address = size(receiveAddress) === 90 ? receiveAddress : addChecksum(receiveAddress);
 
     // Keep track if the inputs are signed
     let hasSignedInputs = false;
@@ -530,10 +531,7 @@ export const makeTransaction = (seedStore, receiveAddress, value, message, accou
             })
             .then(({ inputs }) => {
                 // Do not allow receiving address to be one of the user's own input addresses.
-                const isSendingToAnyInputAddress = some(
-                    inputs,
-                    (input) => input.address === iota.utils.noChecksum(address),
-                );
+                const isSendingToAnyInputAddress = some(inputs, (input) => input.address === removeChecksum(address));
 
                 if (isSendingToAnyInputAddress) {
                     throw new Error(Errors.CANNOT_SEND_TO_OWN_ADDRESS);
@@ -551,7 +549,7 @@ export const makeTransaction = (seedStore, receiveAddress, value, message, accou
                         // Make sure inputs are blacklisted
                         ...map(inputs, (input) => input.address),
                         // Make sure receive address is blacklisted
-                        iota.utils.noChecksum(receiveAddress),
+                        removeChecksum(receiveAddress),
                     ],
                 ).then(({ remainderAddress, remainderIndex, addressDataUptoRemainder }) => {
                     // getAddressesUptoRemainder returns the latest unused address as the remainder address
@@ -603,8 +601,7 @@ export const makeTransaction = (seedStore, receiveAddress, value, message, accou
 
                                 cached.trytes = trytes;
 
-                                const convertToTransactionObjects = (tryteString) =>
-                                    iota.utils.transactionObject(tryteString);
+                                const convertToTransactionObjects = (tryteString) => asTransactionObject(tryteString);
                                 cached.transactionObjects = map(cached.trytes, convertToTransactionObjects);
 
                                 if (isBundle(cached.transactionObjects)) {

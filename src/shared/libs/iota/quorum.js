@@ -284,7 +284,7 @@ const getQuorum = (quorumSize) => (method, syncedNodes, payload, ...args) => {
                                     url,
                                 },
                                 getApiTimeout(iotaApiMethod, payload),
-                            ).api[iotaApiMethod](
+                            )[iotaApiMethod](
                                 ...[
                                     ...requestArgs,
                                     (err, result) =>

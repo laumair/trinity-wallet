@@ -20,10 +20,15 @@
   },
   "license": "Apache-2.0 OR EPL-2.0",
   "dependencies": {
+    "@iota/bundle-validator": "^1.0.0-beta.21",
+    "@iota/checksum": "^1.0.0-beta.21",
+    "@iota/converter": "^1.0.0-beta.21",
     "@iota/core": "^1.0.0-beta.20",
+    "@iota/transaction": "^1.0.0-beta.21",
+    "@iota/transaction-converter": "^1.0.0-beta.21",
+    "add": "^2.0.6",
     "bignumber.js": "^9.0.0",
     "i18next": "^17.0.6",
-    "iota.lib.js": "^0.5.2",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.26",
@@ -36,6 +41,7 @@
     "reselect": "^4.0.0",
     "url-parse": "^1.4.7",
     "valid-url": "^1.0.9",
+    "yarn": "^1.17.3",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

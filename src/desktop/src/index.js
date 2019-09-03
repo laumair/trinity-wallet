@@ -15,7 +15,7 @@ import { mapStorageToState as mapStorageToStateAction } from 'actions/wallet';
 import { updateTheme } from 'actions/settings';
 import mapStorageToState from 'libs/storageToStateMappers';
 import getEncryptionKey from 'libs/realm';
-import { changeIotaNode, quorum } from 'libs/iota';
+import { iota, quorum } from 'libs/iota';
 import { bugsnagClient, ErrorBoundary } from 'libs/bugsnag';
 import { initialise as initialiseStorage } from 'storage';
 import { updateSchema } from 'schemas';
@@ -76,7 +76,7 @@ const init = () => {
 
                 // Change provider on global iota instance
                 const node = get(data, 'settings.node');
-                changeIotaNode(assign({}, node, { provider: node.url }));
+                iota.setSettings(assign({}, node, { provider: node.url }));
 
                 // Set quorum size
                 quorum.setSize(get(data, 'settings.quorum.size'));

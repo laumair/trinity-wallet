@@ -4,12 +4,13 @@ import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import { asTransactionObject } from '@iota/transaction-converter';
 import * as actions from '../../actions/transfers';
 import * as addressesUtils from '../../libs/iota/addresses';
 import * as transferUtils from '../../libs/iota/transfers';
 import * as accountsUtils from '../../libs/iota/accounts';
 import * as inputUtils from '../../libs/iota/inputs';
-import { iota, quorum } from '../../libs/iota';
+import { quorum } from '../../libs/iota';
 import { realm, Account, Node, Wallet, getRealm, initialise } from '../../storage';
 import accounts from '../__samples__/accounts';
 import { addressData, latestAddressObject } from '../__samples__/addresses';
@@ -295,7 +296,7 @@ describe('actions: transfers', () => {
                 performPow: (trytes) =>
                     Promise.resolve({
                         trytes,
-                        transactionObjects: map(trytes, iota.utils.transactionObject),
+                        transactionObjects: map(trytes, asTransactionObject),
                     }),
                 getDigest: () => Promise.resolve('9'.repeat(81)),
             };

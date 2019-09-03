@@ -10,8 +10,9 @@ import sampleSize from 'lodash/sampleSize';
 import size from 'lodash/size';
 import cloneDeep from 'lodash/cloneDeep';
 import URL from 'url-parse';
+import { addChecksum, isValidChecksum } from '@iota/checksum';
+import { asciiToTrytes, trytesToAscii } from '@iota/converter';
 import { BigNumber } from 'bignumber.js';
-import { iota } from './index';
 import { isNodeHealthy } from './extendedApi';
 import { NODELIST_ENDPOINTS, FETCH_REMOTE_NODES_REQUEST_TIMEOUT, MAX_REQUEST_TIMEOUT } from '../../config';
 import Errors from '../errors';
@@ -63,7 +64,7 @@ export const IOTA_DENOMINATIONS = ['i', 'Ki', 'Mi', 'Gi', 'Ti'];
  */
 export const convertFromTrytes = (trytes) => {
     const trytesWithoutNines = trytes.replace(/9+$/, '');
-    const message = iota.utils.fromTrytes(trytesWithoutNines);
+    const message = trytesToAscii(trytesWithoutNines);
 
     /* eslint-disable no-control-regex */
     if (trytesWithoutNines && message && /^[\x00-\xFF]*$/.test(message)) {
@@ -88,15 +89,13 @@ export const getChecksum = (
     // Trinity trytes to trits conversion creates Int8Array
     length = isArray(input) || input instanceof Int8Array ? SEED_CHECKSUM_LENGTH * 3 : SEED_CHECKSUM_LENGTH,
 ) => {
-    return iota.utils
-        .addChecksum(
-            // https://github.com/iotaledger/iota.js/blob/develop/lib/utils/utils.js#L64
-            // iota.lib.js throws an exception for typed arrays
-            input instanceof Int8Array ? Array.from(input) : input,
-            length,
-            false,
-        )
-        .slice(-length);
+    return addChecksum(
+        // https://github.com/iotaledger/iota.js/blob/develop/lib/utils/utils.js#L64
+        // iota.lib.js throws an exception for typed arrays
+        input instanceof Int8Array ? Array.from(input) : input,
+        length,
+        false,
+    ).slice(-length);
 };
 
 /**
@@ -245,7 +244,7 @@ export const isValidServerAddress = (server) => {
  */
 export const isValidAddress = (address) => {
     if (!isNull(address.match(VALID_SEED_REGEX))) {
-        return size(address) === 90 && iota.utils.isValidChecksum(address);
+        return size(address) === 90 && isValidChecksum(address);
     }
 
     return false;
@@ -270,7 +269,7 @@ export const isLastTritZero = (address) => !/[E-V]/.test(address.slice(80, 81));
  * @returns {boolean}
  */
 export const isValidMessage = (message) => {
-    return iota.utils.fromTrytes(iota.utils.toTrytes(message)) === message;
+    return trytesToAscii(asciiToTrytes(message)) === message;
 };
 
 /**

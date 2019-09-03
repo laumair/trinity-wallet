@@ -1,5 +1,5 @@
 /* global Electron */
-import { iota } from 'libs/iota';
+import { asTransactionObject } from '@iota/transaction-converter';
 import { performPow } from 'libs/iota/transfers';
 
 export default class SeedStoreCore {
@@ -39,6 +39,6 @@ export default class SeedStoreCore {
      * @returns {Promise<string>}
      */
     getDigest(trytes) {
-        return Promise.resolve(iota.utils.transactionObject(trytes).hash);
+        return Promise.resolve(asTransactionObject(trytes).hash);
     }
 }

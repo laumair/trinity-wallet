@@ -24,8 +24,12 @@ import reduce from 'lodash/reduce';
 import transform from 'lodash/transform';
 import orderBy from 'lodash/orderBy';
 import xor from 'lodash/xor';
+import { isBundle as isValidBundle } from '@iota/bundle-validator';
+import { addChecksum, removeChecksum } from '@iota/checksum';
+import { asciiToTrytes } from '@iota/converter';
+import { isTransactionHash } from '@iota/transaction';
+import { asTransactionObject, asTransactionTrytes } from '@iota/transaction-converter';
 import { DEFAULT_TAG, DEFAULT_MIN_WEIGHT_MAGNITUDE, BUNDLE_OUTPUTS_THRESHOLD } from '../../config';
-import { iota } from './index';
 import { accumulateBalance } from './addresses';
 import {
     getBalancesAsync,
@@ -169,7 +173,7 @@ export const prepareTransferArray = (address, value, message, addressData, tag =
         throw new Error(Errors.EMPTY_ADDRESS_DATA);
     }
 
-    const trytesConvertedMessage = iota.utils.toTrytes(message);
+    const trytesConvertedMessage = asciiToTrytes(message);
     const transfer = {
         address,
         value,
@@ -180,7 +184,7 @@ export const prepareTransferArray = (address, value, message, addressData, tag =
     const isZeroValueTransaction = value === 0;
 
     if (isZeroValueTransaction) {
-        return includes(map(addressData, (addressObject) => addressObject.address), iota.utils.noChecksum(address))
+        return includes(map(addressData, (addressObject) => addressObject.address), removeChecksum(address))
             ? [transfer]
             : [transfer, assign({}, transfer, { address: firstAddress })];
     }
@@ -206,7 +210,7 @@ export const categoriseBundleByInputsOutputs = (bundle, addresses, outputsThresh
         (acc, tx) => {
             const meta = {
                 ...pick(tx, ['address', 'value', 'hash', 'currentIndex', 'lastIndex']),
-                checksum: iota.utils.addChecksum(tx.address).slice(tx.address.length),
+                checksum: addChecksum(tx.address).slice(tx.address.length),
             };
 
             if (tx.value < 0) {
@@ -578,7 +582,7 @@ export const performSequentialPow = (
     minWeightMagnitude,
 ) => {
     const transactionObjects = map(trytes, (transactionTrytes) =>
-        assign({}, iota.utils.transactionObject(transactionTrytes), {
+        assign({}, asTransactionObject(transactionTrytes), {
             attachmentTimestamp: Date.now(),
             attachmentTimestampLowerBound: 0,
             attachmentTimestampUpperBound: (Math.pow(3, 27) - 1) / 2,
@@ -605,7 +609,7 @@ export const performSequentialPow = (
                     branchTransaction: index ? trunkTransaction : branchTransaction,
                 });
 
-                const transactionTryteString = iota.utils.transactionTrytes(withParentTransactions);
+                const transactionTryteString = asTransactionTrytes(withParentTransactions);
 
                 return powFn(transactionTryteString, minWeightMagnitude)
                     .then((nonce) => {
@@ -613,9 +617,7 @@ export const performSequentialPow = (
 
                         result.trytes.unshift(trytesWithNonce);
 
-                        return digestFn(trytesWithNonce).then((digest) =>
-                            iota.utils.transactionObject(trytesWithNonce, digest),
-                        );
+                        return digestFn(trytesWithNonce).then((digest) => asTransactionObject(trytesWithNonce, digest));
                     })
                     .then((transactionObject) => {
                         result.transactionObjects.unshift(transactionObject);
@@ -638,7 +640,7 @@ export const performSequentialPow = (
  * @returns {function(array, object): Promise<object>}
  **/
 export const retryFailedTransaction = (settings) => (transactionObjects, seedStore) => {
-    const convertToTrytes = (tx) => iota.utils.transactionTrytes(tx);
+    const convertToTrytes = (tx) => asTransactionTrytes(tx);
 
     const cached = {
         transactionObjects: cloneDeep(transactionObjects),
@@ -646,7 +648,7 @@ export const retryFailedTransaction = (settings) => (transactionObjects, seedSto
     };
 
     const isInvalidTransactionHash = ({ hash }) =>
-        hash === EMPTY_HASH_TRYTES || !iota.utils.isTransactionHash(hash, DEFAULT_MIN_WEIGHT_MAGNITUDE);
+        hash === EMPTY_HASH_TRYTES || !isTransactionHash(hash, DEFAULT_MIN_WEIGHT_MAGNITUDE);
 
     // Verify if all transaction objects have valid hash
     // Proof of work was not performed correctly if any transaction has invalid hash
@@ -749,14 +751,14 @@ export const sortTransactionTrytesArray = (trytes, sortBy = 'currentIndex', orde
     }
 
     const transactionObjects = map(trytes, (tryteString) =>
-        iota.utils.transactionObject(
+        asTransactionObject(
             tryteString,
             // Pass in null hash trytes to avoid computing transaction hash.
             EMPTY_HASH_TRYTES,
         ),
     );
 
-    return map(orderBy(transactionObjects, [sortBy], [order]), iota.utils.transactionTrytes);
+    return map(orderBy(transactionObjects, [sortBy], [order]), asTransactionTrytes);
 };
 
 /**
@@ -1030,7 +1032,7 @@ export const constructBundleFromAttachedTrytes = (attachedTrytes, seedStore) => 
         (promise, tryteString) => {
             return promise.then((result) => {
                 return seedStore.getDigest(tryteString).then((digest) => {
-                    const transactionObject = iota.utils.transactionObject(tryteString, digest);
+                    const transactionObject = asTransactionObject(tryteString, digest);
 
                     result.unshift(transactionObject);
 
@@ -1072,7 +1074,7 @@ export const isBundleTraversable = (bundle, trunkTransaction, branchTransaction)
  *
  * @returns {boolean}
  */
-export const isBundle = (bundle) => iota.utils.isBundle(orderBy(bundle, ['currentIndex'], ['asc']));
+export const isBundle = (bundle) => isValidBundle(orderBy(bundle, ['currentIndex'], ['asc']));
 
 /**
  * Determines if a transaction error should be considere fatal
