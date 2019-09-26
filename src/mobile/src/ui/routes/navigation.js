@@ -29,6 +29,7 @@ import PrivacyPolicy from 'ui/views/onboarding/PrivacyPolicy';
 import ForceChangePassword from 'ui/views/wallet/ForceChangePassword';
 import SeedVaultBackupComponent from 'ui/views/onboarding/SeedVaultBackup';
 import MigrationComponent from 'ui/components/Migration';
+import MoonPayAddPaymentMethod from 'ui/views/wallet/exchanges/MoonPay/AddPaymentMethod';
 import { isIPhoneX, isAndroid } from 'libs/device';
 
 function applyHOCs(screen) {
@@ -43,6 +44,12 @@ function applyHOCs(screen) {
 }
 
 export default function registerScreens(store, Provider) {
+    Navigation.registerComponentWithRedux(
+        'addPaymentMethod',
+        () => applyHOCs(MoonPayAddPaymentMethod),
+        Provider,
+        store,
+    );
     Navigation.registerComponentWithRedux('migration', () => applyHOCs(MigrationComponent), Provider, store);
     Navigation.registerComponentWithRedux('home', () => applyHOCs(Home), Provider, store);
     Navigation.registerComponentWithRedux('loading', () => applyHOCs(Loading), Provider, store);
