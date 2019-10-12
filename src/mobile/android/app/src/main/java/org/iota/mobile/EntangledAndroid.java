@@ -14,7 +14,6 @@ import com.facebook.react.bridge.ReactContext;
 import static org.iota.mobile.Converter.readableArrayToByteArray;
 import static org.iota.mobile.Converter.byteArrayToWritableArray;
 
-
 public class EntangledAndroid extends ReactContextBaseJavaModule {
     private final ReactContext mContext;
 
@@ -26,6 +25,18 @@ public class EntangledAndroid extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "EntangledAndroid";
+    }
+
+    @ReactMethod
+    public void mine(ReadableArray bundle_normalized_max, int security, ReadableArray essence, int essence_length,
+            int count, int nprocs, Promise promise) {
+        byte[] bundle_normalized_max_bytes = readableArrayToByteArray(bundle_normalized_max);
+        byte[] essence_bytes = readableArrayToByteArray(essence);
+
+        long bundle = Interface.bundle_miner_mine(bundle_normalized_max_bytes, security, essence_bytes, essence_length,
+                count, nprocs);
+
+        promise.resolve(bundle);
     }
 
     @ReactMethod
@@ -41,7 +52,8 @@ public class EntangledAndroid extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void generateAddresses(final ReadableArray seed, final int index, final int security, final int total, final Promise promise) {
+    public void generateAddresses(final ReadableArray seed, final int index, final int security, final int total,
+            final Promise promise) {
         if (seed.size() == 243) {
             byte[] seedByteArr = readableArrayToByteArray(seed);
             new GuardedResultAsyncTask<ReadableNativeArray>(mContext) {
@@ -71,20 +83,22 @@ public class EntangledAndroid extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getDigest(String trytes, Promise promise) {
-      String digest = Interface.iota_digest(trytes);
-      promise.resolve(digest);
+        String digest = Interface.iota_digest(trytes);
+        promise.resolve(digest);
     }
 
     @ReactMethod
-    public void generateSignature(ReadableArray seed, int index, int security, ReadableArray bundleHash, Promise promise) {
+    public void generateSignature(ReadableArray seed, int index, int security, ReadableArray bundleHash,
+            Promise promise) {
         if (seed.size() == 243) {
-           byte[] seedByteArr = readableArrayToByteArray(seed);
-           byte[] bundleHashByteArr = readableArrayToByteArray(bundleHash);
-           byte[] signatureByteArr = Interface.iota_sign_signature_gen_trits(seedByteArr, index, security, bundleHashByteArr);
-           WritableArray signatureWritableArr = byteArrayToWritableArray(signatureByteArr);
-           promise.resolve(signatureWritableArr);
+            byte[] seedByteArr = readableArrayToByteArray(seed);
+            byte[] bundleHashByteArr = readableArrayToByteArray(bundleHash);
+            byte[] signatureByteArr = Interface.iota_sign_signature_gen_trits(seedByteArr, index, security,
+                    bundleHashByteArr);
+            WritableArray signatureWritableArr = byteArrayToWritableArray(signatureByteArr);
+            promise.resolve(signatureWritableArr);
         } else {
-           promise.reject("Error: Signature generation failed.");
+            promise.reject("Error: Signature generation failed.");
         }
     }
 
@@ -105,13 +119,8 @@ public class EntangledAndroid extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void bundlePow(
-        final ReadableArray trytes,
-        final String trunk,
-        final String branch,
-        final int mwm,
-        final Promise promise
-    ) {
+    public void bundlePow(final ReadableArray trytes, final String trunk, final String branch, final int mwm,
+            final Promise promise) {
         new GuardedResultAsyncTask<String[]>(mContext) {
             @Override
             protected String[] doInBackgroundGuarded() {

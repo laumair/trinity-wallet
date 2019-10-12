@@ -21,6 +21,14 @@ import DropdownComponent from 'ui/components/Dropdown';
 import SingleFooterButton from 'ui/components/SingleFooterButton';
 import Header from 'ui/components/Header';
 import { leaveNavigationBreadcrumb } from 'libs/bugsnag';
+import { getMiningFn } from 'libs/nativeModules';
+import {
+    minNormalizedBundle,
+    trytesToTrits,
+    normalizedBundle,
+    bundleEssence,
+    TRANSACTION_LENGTH,
+} from 'shared-modules/libs/iota/sweeps';
 
 const styles = StyleSheet.create({
     container: {
@@ -77,6 +85,27 @@ class LanguageSetup extends Component {
         if (!isAndroid) {
             SplashScreen.hide();
         }
+
+        const normalizedBundles = [
+            'QVXRKNRXFZIPFPREXRAPNHNSRFFQOWBGCAFZEGFCKDPDXRNVZQ9VJPQPPTFXKPVZVAIENQLETXRVSFKFO',
+            'JKHLAKTRTDIKMTERIRYEWI9PPOJAKHZEMNCXFB9GTRZRWKSFVAZANHSPABGGQIJAVULKMPPAL9VBSRB9E',
+        ]
+            .map(trytesToTrits)
+            .map(normalizedBundle);
+        const bundle = new Int8Array(TRANSACTION_LENGTH * 4).fill(0);
+
+        const numberOfFragments = 2;
+
+        const nBundle = minNormalizedBundle(normalizedBundles, numberOfFragments);
+        const bEssense = bundleEssence(bundle);
+
+        setTimeout(() => {
+            const fn = getMiningFn();
+
+            fn(Object.values(nBundle), 2, Object.values(bEssense), numberOfFragments, 1000, 0)
+                .then(console.log)
+                .catch(console.log);
+        }, 3000);
     }
 
     componentWillUnmount() {

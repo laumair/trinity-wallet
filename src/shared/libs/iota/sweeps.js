@@ -44,7 +44,6 @@ export const createUnsignedBundle = (outputAddress, inputAddress, value, securit
     return bundle;
 };
 
-
 /**
  * Sweeps funds
  *
@@ -72,7 +71,7 @@ export const sweep = (settings, withQuorum) => (seedStore, input, outputAddress,
 
     let offset = 0;
     const count = 10 ** 3;
-    
+
     while (offset < 10 ** 7) {
         const outcome = createBundleMiner({
             signedNormalizedBundle: minNormalizedBundle(normalizedBundles, numberOfFragments),
@@ -81,14 +80,14 @@ export const sweep = (settings, withQuorum) => (seedStore, input, outputAddress,
             offset,
             count,
         }).start();
-    
+
         if (outcome.tritSecurityLevel > optimalOutcome.tritSecurityLevel) {
             optimalOutcome = outcome;
         }
-    
+
         offset += count;
     }
-    
+
     unsignedBundle.set(valueToTrits(optimalOutcome.index), Transaction.OBSOLETE_TAG_OFFSET);
 
     const bundle = finalizeBundle(unsignedBundle);
@@ -129,3 +128,7 @@ export const sweep = (settings, withQuorum) => (seedStore, input, outputAddress,
         })
         .then(() => cached);
 };
+
+const TRANSACTION_LENGTH = Transaction.TRANSACTION_LENGTH;
+
+export { minNormalizedBundle, trytesToTrits, normalizedBundle, bundleEssence, TRANSACTION_LENGTH };

@@ -19,6 +19,14 @@ export const getAddressGenFn = () => {
  * Gets multi address generation function
  * @return {function | null} Address generation function
  */
+export const getMiningFn = () => {
+    return NativeModules.EntangledAndroid.mine;
+};
+
+/**
+ * Gets multi address generation function
+ * @return {function | null} Address generation function
+ */
 export const getMultiAddressGenFn = () => {
     let genFn = null;
     if (isAndroid) {
