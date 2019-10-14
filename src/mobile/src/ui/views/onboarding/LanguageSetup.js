@@ -92,6 +92,7 @@ class LanguageSetup extends Component {
         ]
             .map(trytesToTrits)
             .map(normalizedBundle);
+
         const bundle = new Int8Array(TRANSACTION_LENGTH * 4).fill(0);
 
         const numberOfFragments = 2;
@@ -102,9 +103,11 @@ class LanguageSetup extends Component {
         setTimeout(() => {
             const fn = getMiningFn();
 
-            fn(Object.values(nBundle), 2, Object.values(bEssense), numberOfFragments, 1000, 0)
+            fn(Object.values(nBundle), 2, Object.values(bEssense), 486 * 4, 1000000, 0)
+                /* eslint-disable no-console */
                 .then(console.log)
                 .catch(console.log);
+            /* eslint-enable no-console */
         }, 3000);
     }
 

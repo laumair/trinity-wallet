@@ -33,10 +33,16 @@ public class EntangledAndroid extends ReactContextBaseJavaModule {
         byte[] bundle_normalized_max_bytes = readableArrayToByteArray(bundle_normalized_max);
         byte[] essence_bytes = readableArrayToByteArray(essence);
 
-        long bundle = Interface.bundle_miner_mine(bundle_normalized_max_bytes, security, essence_bytes, essence_length,
-                count, nprocs);
+        try {
+            long bundle = Interface.bundle_miner_mine(bundle_normalized_max_bytes, security, essence_bytes,
+                    essence_length, count, nprocs);
+            double d = (double) bundle;
 
-        promise.resolve(bundle);
+            promise.resolve(d);
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+
     }
 
     @ReactMethod
