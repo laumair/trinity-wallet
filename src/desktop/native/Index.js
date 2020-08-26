@@ -93,15 +93,13 @@ let globalErrorFlag = false;
  * Register iota:// protocol for deep links
  * Set Trinity as the default handler for iota:// protocol
  */
-if (!devMode) {
-    protocol.registerSchemesAsPrivileged([{ scheme: 'iota', privileges: { secure: true, standard: true } }]);
-    if (process.defaultApp) {
-        if (process.argv.length >= 2) {
-            app.setAsDefaultProtocolClient('iota', process.execPath, [path.resolve(process.argv[1])]);
-        }
-    } else {
-        app.setAsDefaultProtocolClient('iota');
+protocol.registerSchemesAsPrivileged([{ scheme: 'iota', privileges: { secure: true, standard: true } }]);
+if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+        app.setAsDefaultProtocolClient('iota', process.execPath, [path.resolve(process.argv[1])]);
     }
+} else {
+    app.setAsDefaultProtocolClient('iota');
 }
 
 let windowState = {
@@ -240,18 +238,16 @@ function createWindow() {
      * Enable React and Redux devtools in development mode
      */
 
-    if (devMode) {
-        windows.main.webContents.once('dom-ready', () => {
-            windows.main.webContents.openDevTools({ mode: 'detach' });
-            /* Uncomment to enable Tray app DevTools on macOS
-            if (process.platform === 'darwin') {
-                windows.tray.webContents.openDevTools({ mode: 'detach' });
-            }
-            */
-            installExtension(REACT_DEVELOPER_TOOLS);
-            installExtension(REDUX_DEVTOOLS);
-        });
-    }
+    windows.main.webContents.once('dom-ready', () => {
+        windows.main.webContents.openDevTools({ mode: 'detach' });
+        /* Uncomment to enable Tray app DevTools on macOS
+        if (process.platform === 'darwin') {
+            windows.tray.webContents.openDevTools({ mode: 'detach' });
+        }
+        */
+        installExtension(REACT_DEVELOPER_TOOLS);
+        installExtension(REDUX_DEVTOOLS);
+    });
 
     /**
      * Add right click context menu for input elements
